@@ -1,26 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FAF8F4;
+  --foreground: #2C1F14;
 }
 
+/* Font vars are provided dynamically by Next.js — reference via @theme inline */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-lora);
+  --font-sans: var(--font-inter);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Static design-token colors */
+@theme {
+  --color-cream: #FAF8F4;
+  --color-cream-dark: #EDE8DF;
+  --color-terracotta: #C97B55;
+  --color-terracotta-dark: #A85F3C;
+  --color-sage: #6B8F5E;
+  --color-sage-dark: #567047;
+  --color-warm-100: #F0EAE0;
+  --color-warm-200: #DDD0C4;
+  --color-warm-300: #C4B5A5;
+  --color-warm-400: #A89A8A;
+  --color-warm-500: #8C7B68;
+  --color-warm-700: #5C4A38;
+  --color-warm-900: #2C1F14;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
