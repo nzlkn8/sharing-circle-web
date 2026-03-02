@@ -73,6 +73,10 @@ export default function SetupPage({ params }) {
     }
   }
 
+  function normalizePhone(phone) {
+    return phone.replace(/\D/g, "");
+  }
+
   async function handleAdd(e) {
     e.preventDefault();
     console.log("[handleAdd] called", { form, ownerPhone, membersCount: members.length });
@@ -93,7 +97,7 @@ export default function SetupPage({ params }) {
       .insert({
         sender_phone: ownerPhone,
         recipient_name: form.recipient_name,
-        recipient_phone: form.recipient_phone,
+        recipient_phone: normalizePhone(form.recipient_phone),
         recipient_email: form.recipient_email,
       })
       .select()
