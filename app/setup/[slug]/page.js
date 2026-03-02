@@ -14,13 +14,13 @@ export default function SetupPage({ params }) {
   const [form, setForm] = useState({ recipient_name: "", recipient_phone: "", recipient_email: "" });
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState(null);
-  const [hasContactPicker, setHasContactPicker] = useState(false);
+  const [hasContactPicker, setHasContactPicker] = useState(null);
 
   useEffect(() => {
     setHasContactPicker(
       typeof navigator !== "undefined" &&
         "contacts" in navigator &&
-        "ContactsManager" in window
+        typeof navigator.contacts.select === "function"
     );
 
     async function init() {
@@ -72,7 +72,7 @@ export default function SetupPage({ params }) {
 
   async function handleAdd(e) {
     e.preventDefault();
-    if (!form.recipient_name || !form.recipient_phone || members.length >= MAX_MEMBERS || !ownerPhone) return;
+    if (!form.recipient_name || !form.recipient_phone || !form.recipient_email || members.length >= MAX_MEMBERS || !ownerPhone) return;
 
     setAdding(true);
     const { data, error } = await supabase
@@ -81,7 +81,7 @@ export default function SetupPage({ params }) {
         sender_phone: ownerPhone,
         recipient_name: form.recipient_name,
         recipient_phone: form.recipient_phone,
-        recipient_email: form.recipient_email || null,
+        recipient_email: form.recipient_email,
       })
       .select()
       .single();
@@ -201,8 +201,8 @@ export default function SetupPage({ params }) {
           <section className="bg-white rounded-2xl p-6 border border-warm-100 shadow-sm">
             <h3 className="font-serif text-lg font-semibold text-warm-900 mb-5">Add someone</h3>
 
-            {/* Contact picker (mobile Chrome) */}
-            {hasContactPicker && (
+            {/* Contact picker */}
+            {hasContactPicker === true && (
               <>
                 <button
                   onClick={handleContactPicker}
@@ -213,6 +213,11 @@ export default function SetupPage({ params }) {
                 </button>
                 <Divider label="or fill in manually" />
               </>
+            )}
+            {hasContactPicker === false && (
+              <p className="text-xs text-warm-400 mb-4">
+                Contact import isn&rsquo;t available in this browser. On iOS Safari 14+ or Android Chrome you can pick contacts directly.
+              </p>
             )}
 
             <form onSubmit={handleAdd} className="space-y-3.5">
@@ -234,7 +239,7 @@ export default function SetupPage({ params }) {
               />
               <Field
                 label="Email"
-                optional
+                required
                 value={form.recipient_email}
                 onChange={(v) => setForm((f) => ({ ...f, recipient_email: v }))}
                 placeholder="alex@example.com"
@@ -242,7 +247,7 @@ export default function SetupPage({ params }) {
               />
               <button
                 type="submit"
-                disabled={adding || !form.recipient_name || !form.recipient_phone}
+                disabled={adding || !form.recipient_name || !form.recipient_phone || !form.recipient_email}
                 className="w-full bg-terracotta text-white font-semibold py-3 rounded-xl hover:bg-terracotta-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
               >
                 {adding ? "Adding…" : "Add to circle"}
