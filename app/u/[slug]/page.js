@@ -37,11 +37,14 @@ export default function FeedPage({ params }) {
   useEffect(() => {
     async function fetchPosts() {
       // Step 1: resolve slug → phone_number + name
-      const { data: owner } = await supabase
+      const { data: owner, error: ownerError } = await supabase
         .from("users")
         .select("phone_number, name")
         .eq("feed_slug", slug)
         .single();
+
+      if (ownerError) console.error("[feed] users lookup error:", ownerError);
+      console.log("[feed] owner lookup result:", { slug, owner });
 
       if (!owner) {
         setNotFound(true);

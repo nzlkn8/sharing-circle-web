@@ -25,11 +25,14 @@ export default function SetupPage({ params }) {
 
     async function init() {
       // Step 1: resolve slug → phone_number
-      const { data: owner } = await supabase
+      const { data: owner, error: ownerError } = await supabase
         .from("users")
         .select("phone_number")
         .eq("feed_slug", slug)
         .single();
+
+      if (ownerError) console.error("[setup] users lookup error:", ownerError);
+      console.log("[setup] owner lookup result:", { slug, owner });
 
       if (!owner) {
         setLoading(false);
@@ -72,7 +75,17 @@ export default function SetupPage({ params }) {
 
   async function handleAdd(e) {
     e.preventDefault();
-    if (!form.recipient_name || !form.recipient_phone || !form.recipient_email || members.length >= MAX_MEMBERS || !ownerPhone) return;
+    console.log("[handleAdd] called", { form, ownerPhone, membersCount: members.length });
+    if (!form.recipient_name || !form.recipient_phone || !form.recipient_email || members.length >= MAX_MEMBERS || !ownerPhone) {
+      console.warn("[handleAdd] early return — missing field or ownerPhone is null", {
+        recipient_name: !!form.recipient_name,
+        recipient_phone: !!form.recipient_phone,
+        recipient_email: !!form.recipient_email,
+        ownerPhone,
+        membersCount: members.length,
+      });
+      return;
+    }
 
     setAdding(true);
     const { data, error } = await supabase
@@ -85,6 +98,9 @@ export default function SetupPage({ params }) {
       })
       .select()
       .single();
+
+    if (error) console.error("[handleAdd] circle insert error:", error);
+    console.log("[handleAdd] insert result:", { data, error });
 
     if (!error && data) {
       setMembers((prev) => [...prev, data]);
