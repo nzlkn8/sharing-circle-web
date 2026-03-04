@@ -25,12 +25,15 @@ export default function SetupPage({ params }) {
     );
 
     async function init() {
+      console.log("[setup] init() slug:", slug);
+
       const { data: owner, error: ownerError } = await supabase
         .from("users")
         .select("phone_number, weekly_digest, daily_digest")
         .eq("feed_slug", slug)
         .single();
 
+      console.log("[setup] users lookup response:", { data: owner, error: ownerError });
       if (ownerError) console.error("[setup] users lookup error:", ownerError);
 
       if (!owner) {
@@ -39,6 +42,7 @@ export default function SetupPage({ params }) {
       }
 
       setOwnerPhone(owner.phone_number);
+      console.log("[setup] ownerPhone set to:", owner.phone_number);
 
       if (owner.weekly_digest !== null && owner.weekly_digest !== undefined) {
         setWeeklyDigest(owner.weekly_digest);
