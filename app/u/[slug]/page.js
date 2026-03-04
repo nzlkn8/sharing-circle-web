@@ -183,39 +183,90 @@ export default function FeedPage({ params }) {
 
 function PostCard({ post }) {
   const isLink = post.type === "link" || post.content?.startsWith("http");
+  const [meta, setMeta] = useState({
+    title: post.title || null,
+    image: post.thumbnail || null,
+  });
+
+  useEffect(() => {
+    if (!isLink || meta.title) return;
+    fetch(`https://api.microlink.io?url=${encodeURIComponent(post.content)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.status === "success") {
+          setMeta({
+            title: data.data.title || null,
+            image: data.data.image?.url || null,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  if (isLink) {
+    return (
+      <article className="bg-white rounded-2xl p-5 border border-warm-100 shadow-sm hover:shadow-md transition-shadow">
+        <a
+          href={post.content}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex gap-4 mb-3 group"
+        >
+          {meta.image && (
+            <img
+              src={meta.image}
+              alt=""
+              className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+            />
+          )}
+          <div className="min-w-0 flex-1">
+            <h2 className="font-semibold text-warm-900 group-hover:text-terracotta transition-colors leading-snug text-[15px]">
+              {meta.title || post.content}
+            </h2>
+            <p className="text-xs text-warm-400 truncate mt-1">{post.content}</p>
+          </div>
+        </a>
+
+        {post.summary && (
+          <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
+            <p className="text-[13px] text-warm-700 leading-relaxed">
+              <span className="text-terracotta font-bold mr-1.5">•</span>
+              {post.summary}
+            </p>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Avatar name={post.sender_name} />
+            <span className="text-xs text-warm-500">{post.sender_name}</span>
+          </div>
+          <span className="text-xs text-warm-300">{timeAgo(post.created_at)}</span>
+        </div>
+      </article>
+    );
+  }
 
   return (
-    <article className="bg-white rounded-2xl p-5 md:p-6 border border-warm-100 shadow-sm hover:shadow-md transition-shadow">
-      {/* Top meta row */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Avatar name={post.sender_name} />
-          <span className="text-xs text-warm-500">{post.sender_name}</span>
-        </div>
-        <span className="text-xs text-warm-300">{timeAgo(post.created_at)}</span>
-      </div>
+    <article className="bg-white rounded-2xl p-5 border border-warm-100 shadow-sm hover:shadow-md transition-shadow">
+      <p className="font-serif text-[17px] text-warm-900 leading-relaxed mb-4">{post.content}</p>
 
-      {/* Content */}
-      {isLink ? (
-        <a href={post.content} target="_blank" rel="noopener noreferrer" className="group block mb-3">
-          <h2 className="font-serif text-lg font-semibold text-warm-900 group-hover:text-terracotta transition-colors leading-snug mb-1">
-            {post.content}
-          </h2>
-          <p className="text-xs text-warm-400 truncate">{post.content}</p>
-        </a>
-      ) : (
-        <p className="font-serif text-[17px] text-warm-900 leading-relaxed mb-3">{post.content}</p>
-      )}
-
-      {/* AI summary */}
       {post.summary && (
-        <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100">
+        <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
           <p className="text-[13px] text-warm-700 leading-relaxed">
             <span className="text-terracotta font-bold mr-1.5">✦</span>
             {post.summary}
           </p>
         </div>
       )}
+
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Avatar name={post.sender_name} />
+          <span className="text-xs text-warm-500">{post.sender_name}</span>
+        </div>
+        <span className="text-xs text-warm-300">{timeAgo(post.created_at)}</span>
+      </div>
     </article>
   );
 }

@@ -4,8 +4,6 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-const MAX_MEMBERS = 15;
-
 export default function SetupPage({ params }) {
   const { slug } = use(params);
   const [ownerPhone, setOwnerPhone] = useState(null);
@@ -15,6 +13,9 @@ export default function SetupPage({ params }) {
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState(null);
   const [hasContactPicker, setHasContactPicker] = useState(null);
+  const [showExisting, setShowExisting] = useState(false);
+  const [weeklyDigest, setWeeklyDigest] = useState(true);
+  const [dailyDigest, setDailyDigest] = useState(false);
 
   useEffect(() => {
     setHasContactPicker(
@@ -24,15 +25,13 @@ export default function SetupPage({ params }) {
     );
 
     async function init() {
-      // Step 1: resolve slug → phone_number
       const { data: owner, error: ownerError } = await supabase
         .from("users")
-        .select("phone_number")
+        .select("phone_number, weekly_digest, daily_digest")
         .eq("feed_slug", slug)
         .single();
 
       if (ownerError) console.error("[setup] users lookup error:", ownerError);
-      console.log("[setup] owner lookup result:", { slug, owner });
 
       if (!owner) {
         setLoading(false);
@@ -41,7 +40,13 @@ export default function SetupPage({ params }) {
 
       setOwnerPhone(owner.phone_number);
 
-      // Step 2: fetch circle members for this owner
+      if (owner.weekly_digest !== null && owner.weekly_digest !== undefined) {
+        setWeeklyDigest(owner.weekly_digest);
+      }
+      if (owner.daily_digest !== null && owner.daily_digest !== undefined) {
+        setDailyDigest(owner.daily_digest);
+      }
+
       const { data } = await supabase
         .from("circle")
         .select("*")
@@ -79,17 +84,7 @@ export default function SetupPage({ params }) {
 
   async function handleAdd(e) {
     e.preventDefault();
-    console.log("[handleAdd] called", { form, ownerPhone, membersCount: members.length });
-    if (!form.recipient_name || !form.recipient_phone || !form.recipient_email || members.length >= MAX_MEMBERS || !ownerPhone) {
-      console.warn("[handleAdd] early return — missing field or ownerPhone is null", {
-        recipient_name: !!form.recipient_name,
-        recipient_phone: !!form.recipient_phone,
-        recipient_email: !!form.recipient_email,
-        ownerPhone,
-        membersCount: members.length,
-      });
-      return;
-    }
+    if (!form.recipient_name || !form.recipient_phone || !form.recipient_email || !ownerPhone) return;
 
     setAdding(true);
     const { data, error } = await supabase
@@ -104,13 +99,30 @@ export default function SetupPage({ params }) {
       .single();
 
     if (error) console.error("[handleAdd] circle insert error:", error);
-    console.log("[handleAdd] insert result:", { data, error });
 
     if (!error && data) {
       setMembers((prev) => [...prev, data]);
       setForm({ recipient_name: "", recipient_phone: "", recipient_email: "" });
     }
     setAdding(false);
+  }
+
+  async function handleReAdd(member) {
+    if (!ownerPhone) return;
+    const { data, error } = await supabase
+      .from("circle")
+      .insert({
+        sender_phone: ownerPhone,
+        recipient_name: member.recipient_name,
+        recipient_phone: member.recipient_phone,
+        recipient_email: member.recipient_email,
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      setMembers((prev) => [...prev, data]);
+    }
   }
 
   async function handleRemove(id) {
@@ -120,10 +132,11 @@ export default function SetupPage({ params }) {
     setRemoving(null);
   }
 
-  const spotsUsed = members.length;
-  const spotsLeft = MAX_MEMBERS - spotsUsed;
-  const isFull = spotsUsed >= MAX_MEMBERS;
-  const fillPercent = Math.round((spotsUsed / MAX_MEMBERS) * 100);
+  async function handleDigestToggle(field, value) {
+    if (field === "weekly_digest") setWeeklyDigest(value);
+    if (field === "daily_digest") setDailyDigest(value);
+    await supabase.from("users").update({ [field]: value }).eq("feed_slug", slug);
+  }
 
   return (
     <div className="min-h-screen bg-cream">
@@ -144,43 +157,10 @@ export default function SetupPage({ params }) {
       </header>
 
       <main className="max-w-2xl mx-auto px-5 py-8 space-y-6">
-        {/* Spots card */}
+        {/* Circle header card */}
         <div className="bg-white rounded-2xl p-6 border border-warm-100 shadow-sm">
-          <div className="flex items-start justify-between gap-4 mb-3">
-            <div>
-              <h2 className="font-serif text-xl font-semibold text-warm-900">Your Circle</h2>
-              <p className="text-sm text-warm-400 mt-0.5">People who share with you</p>
-            </div>
-            <span
-              className={`flex-shrink-0 text-sm font-bold px-3 py-1.5 rounded-full ${
-                isFull ? "bg-terracotta/10 text-terracotta" : "bg-sage/10 text-sage"
-              }`}
-            >
-              {spotsUsed}/{MAX_MEMBERS}
-            </span>
-          </div>
-
-          {/* Progress bar */}
-          <div className="h-1.5 bg-warm-100 rounded-full overflow-hidden mt-4 mb-2">
-            <div
-              className="h-full bg-terracotta rounded-full transition-all duration-500"
-              style={{ width: `${fillPercent}%` }}
-            />
-          </div>
-          <p className="text-xs text-warm-400">
-            {isFull
-              ? "Circle is full — remove a member to add someone new."
-              : `${spotsLeft} spot${spotsLeft !== 1 ? "s" : ""} remaining`}
-          </p>
-
-          {/* Dunbar note */}
-          <div className="mt-5 border-t border-warm-100 pt-4">
-            <p className="text-xs text-warm-400 leading-relaxed">
-              <span className="text-warm-700 font-medium">Why 15?</span> Circles are capped at 15 — the size
-              anthropologist Robin Dunbar identified as the layer of closest, most active relationships we
-              maintain. Quality over quantity.
-            </p>
-          </div>
+          <h2 className="font-serif text-xl font-semibold text-warm-900">Your Circle</h2>
+          <p className="text-sm text-warm-400 mt-0.5">People who share with you</p>
         </div>
 
         {/* Members list */}
@@ -211,70 +191,115 @@ export default function SetupPage({ params }) {
         </section>
 
         {/* Add member */}
-        {isFull ? (
-          <div className="bg-terracotta/5 border border-terracotta/20 rounded-2xl p-5 text-center">
-            <p className="text-sm text-terracotta font-medium">
-              Your circle is full. Remove a member to invite someone new.
-            </p>
-          </div>
-        ) : (
-          <section className="bg-white rounded-2xl p-6 border border-warm-100 shadow-sm">
-            <h3 className="font-serif text-lg font-semibold text-warm-900 mb-5">Add someone</h3>
+        <section className="bg-white rounded-2xl p-6 border border-warm-100 shadow-sm">
+          <h3 className="font-serif text-lg font-semibold text-warm-900 mb-5">Add someone</h3>
 
-            {/* Contact picker */}
-            {hasContactPicker === true && (
-              <>
-                <button
-                  onClick={handleContactPicker}
-                  type="button"
-                  className="w-full flex items-center justify-center gap-2 bg-sage/10 text-sage border border-sage/20 rounded-xl py-3 text-sm font-semibold mb-4 hover:bg-sage/20 transition-colors"
-                >
-                  <span>📱</span> Pick from contacts
-                </button>
-                <Divider label="or fill in manually" />
-              </>
-            )}
-            {hasContactPicker === false && (
-              <p className="text-xs text-warm-400 mb-4">
-                Contact import isn&rsquo;t available in this browser. On iOS Safari 14+ or Android Chrome you can pick contacts directly.
-              </p>
-            )}
-
-            <form onSubmit={handleAdd} className="space-y-3.5">
-              <Field
-                label="Name"
-                required
-                value={form.recipient_name}
-                onChange={(v) => setForm((f) => ({ ...f, recipient_name: v }))}
-                placeholder="Alex"
-                type="text"
-              />
-              <Field
-                label="Phone"
-                required
-                value={form.recipient_phone}
-                onChange={(v) => setForm((f) => ({ ...f, recipient_phone: v }))}
-                placeholder="+1 555 000 0000"
-                type="tel"
-              />
-              <Field
-                label="Email"
-                required
-                value={form.recipient_email}
-                onChange={(v) => setForm((f) => ({ ...f, recipient_email: v }))}
-                placeholder="alex@example.com"
-                type="email"
-              />
+          {/* Contact picker */}
+          {hasContactPicker === true && (
+            <>
               <button
-                type="submit"
-                disabled={adding || !form.recipient_name || !form.recipient_phone || !form.recipient_email}
-                className="w-full bg-terracotta text-white font-semibold py-3 rounded-xl hover:bg-terracotta-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+                onClick={handleContactPicker}
+                type="button"
+                className="w-full flex items-center justify-center gap-2 bg-sage/10 text-sage border border-sage/20 rounded-xl py-3 text-sm font-semibold mb-4 hover:bg-sage/20 transition-colors"
               >
-                {adding ? "Adding…" : "Add to circle"}
+                <span>📱</span> Pick from contacts
               </button>
-            </form>
-          </section>
-        )}
+              <Divider label="or fill in manually" />
+            </>
+          )}
+          {hasContactPicker === false && (
+            <p className="text-xs text-warm-400 mb-4">
+              Contact import isn&rsquo;t available in this browser. On iOS Safari 14+ or Android Chrome you can pick contacts directly.
+            </p>
+          )}
+
+          <form onSubmit={handleAdd} className="space-y-3.5">
+            <Field
+              label="Name"
+              required
+              value={form.recipient_name}
+              onChange={(v) => setForm((f) => ({ ...f, recipient_name: v }))}
+              placeholder="Alex"
+              type="text"
+            />
+            <Field
+              label="Phone"
+              required
+              value={form.recipient_phone}
+              onChange={(v) => setForm((f) => ({ ...f, recipient_phone: v }))}
+              placeholder="+1 555 000 0000"
+              type="tel"
+              hint="Open WhatsApp, go to their contact, tap their name and copy their number"
+            />
+            <Field
+              label="Email"
+              required
+              value={form.recipient_email}
+              onChange={(v) => setForm((f) => ({ ...f, recipient_email: v }))}
+              placeholder="alex@example.com"
+              type="email"
+            />
+            <button
+              type="submit"
+              disabled={adding || !form.recipient_name || !form.recipient_phone || !form.recipient_email}
+              className="w-full bg-terracotta text-white font-semibold py-3 rounded-xl hover:bg-terracotta-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+            >
+              {adding ? "Adding…" : "Add to circle"}
+            </button>
+          </form>
+
+          {/* Add existing contact */}
+          {members.length > 0 && (
+            <div className="mt-5 border-t border-warm-100 pt-4">
+              <button
+                onClick={() => setShowExisting((v) => !v)}
+                className="w-full flex items-center justify-between text-sm text-warm-500 hover:text-warm-700 transition-colors"
+              >
+                <span>Add existing contact</span>
+                <span className="text-xs">{showExisting ? "▲" : "▼"}</span>
+              </button>
+              {showExisting && (
+                <div className="mt-3 space-y-2">
+                  {members.map((m) => (
+                    <div
+                      key={m.id}
+                      className="flex items-center justify-between gap-3 py-2 px-3 bg-cream rounded-xl border border-warm-100"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-warm-900 truncate">{m.recipient_name}</p>
+                        <p className="text-xs text-warm-400 truncate">{m.recipient_phone}</p>
+                      </div>
+                      <button
+                        onClick={() => handleReAdd(m)}
+                        className="flex-shrink-0 text-xs font-semibold bg-terracotta/10 text-terracotta px-3 py-1.5 rounded-lg hover:bg-terracotta/20 transition-colors"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Digest Settings */}
+        <section className="bg-white rounded-2xl p-6 border border-warm-100 shadow-sm">
+          <h3 className="font-serif text-lg font-semibold text-warm-900 mb-1">Digest Settings</h3>
+          <p className="text-xs text-warm-400 mb-5">Digests are sent to your email on file</p>
+          <div className="space-y-4">
+            <Toggle
+              label="Weekly digest"
+              checked={weeklyDigest}
+              onChange={(v) => handleDigestToggle("weekly_digest", v)}
+            />
+            <Toggle
+              label="Daily digest"
+              checked={dailyDigest}
+              onChange={(v) => handleDigestToggle("daily_digest", v)}
+            />
+          </div>
+        </section>
       </main>
     </div>
   );
@@ -306,7 +331,7 @@ function MemberRow({ member, removing, onRemove }) {
   );
 }
 
-function Field({ label, value, onChange, placeholder, type, required, optional }) {
+function Field({ label, value, onChange, placeholder, type, required, optional, hint }) {
   return (
     <div>
       <label className="block text-sm font-medium text-warm-700 mb-1">
@@ -321,6 +346,29 @@ function Field({ label, value, onChange, placeholder, type, required, optional }
         required={required}
         className="w-full px-4 py-2.5 rounded-xl border border-warm-200 bg-cream text-warm-900 text-sm placeholder-warm-300 focus:outline-none focus:ring-2 focus:ring-terracotta/25 focus:border-terracotta transition-colors"
       />
+      {hint && <p className="text-xs text-warm-400 mt-1">{hint}</p>}
+    </div>
+  );
+}
+
+function Toggle({ label, checked, onChange }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-warm-800">{label}</span>
+      <button
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
+          checked ? "bg-terracotta" : "bg-warm-200"
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            checked ? "translate-x-5" : "translate-x-0"
+          }`}
+        />
+      </button>
     </div>
   );
 }
