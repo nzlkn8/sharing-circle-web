@@ -29,7 +29,7 @@ export default function SetupPage({ params }) {
 
       const { data: owner, error: ownerError } = await supabase
         .from("users")
-        .select("phone_number, weekly_digest, daily_digest")
+        .select("phone_number, digest_weekly, digest_daily")
         .eq("feed_slug", slug)
         .single();
 
@@ -44,11 +44,11 @@ export default function SetupPage({ params }) {
       setOwnerPhone(owner.phone_number);
       console.log("[setup] ownerPhone set to:", owner.phone_number);
 
-      if (owner.weekly_digest !== null && owner.weekly_digest !== undefined) {
-        setWeeklyDigest(owner.weekly_digest);
+      if (owner.digest_weekly !== null && owner.digest_weekly !== undefined) {
+        setWeeklyDigest(owner.digest_weekly);
       }
-      if (owner.daily_digest !== null && owner.daily_digest !== undefined) {
-        setDailyDigest(owner.daily_digest);
+      if (owner.digest_daily !== null && owner.digest_daily !== undefined) {
+        setDailyDigest(owner.digest_daily);
       }
 
       const { data } = await supabase
@@ -137,8 +137,8 @@ export default function SetupPage({ params }) {
   }
 
   async function handleDigestToggle(field, value) {
-    if (field === "weekly_digest") setWeeklyDigest(value);
-    if (field === "daily_digest") setDailyDigest(value);
+    if (field === "digest_weekly") setWeeklyDigest(value);
+    if (field === "digest_daily") setDailyDigest(value);
     await supabase.from("users").update({ [field]: value }).eq("feed_slug", slug);
   }
 
@@ -295,12 +295,12 @@ export default function SetupPage({ params }) {
             <Toggle
               label="Weekly digest"
               checked={weeklyDigest}
-              onChange={(v) => handleDigestToggle("weekly_digest", v)}
+              onChange={(v) => handleDigestToggle("digest_weekly", v)}
             />
             <Toggle
               label="Daily digest"
               checked={dailyDigest}
-              onChange={(v) => handleDigestToggle("daily_digest", v)}
+              onChange={(v) => handleDigestToggle("digest_daily", v)}
             />
           </div>
         </section>
