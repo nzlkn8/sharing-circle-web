@@ -229,7 +229,7 @@ function PostCard({ post }) {
 
         {post.summary && (
           <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
-            <SummaryLines text={post.summary} icon="•" />
+            <SummaryLines text={post.summary} />
           </div>
         )}
 
@@ -250,7 +250,7 @@ function PostCard({ post }) {
 
       {post.summary && (
         <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
-          <SummaryLines text={post.summary} icon="✦" />
+          <SummaryLines text={post.summary} />
         </div>
       )}
 
@@ -265,13 +265,15 @@ function PostCard({ post }) {
   );
 }
 
-function SummaryLines({ text, icon }) {
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+function SummaryLines({ text }) {
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim().replace(/^[•\-]\s*/, ""))
+    .filter(Boolean);
   return (
     <div>
       {lines.map((line, i) => (
-        <p key={i} className={`text-[13px] text-warm-700 leading-relaxed${i < lines.length - 1 ? " mb-2" : ""}`}>
-          <span className="text-terracotta font-bold mr-1.5">{icon}</span>
+        <p key={i} className="text-[13px] text-warm-700 leading-relaxed" style={{ marginBottom: i < lines.length - 1 ? 8 : 0 }}>
           {line}
         </p>
       ))}
