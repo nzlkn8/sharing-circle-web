@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "SharingCircle — Share your finds with your people",
+  title: "FaveFinds — Share your finds with your people",
   description:
     "A warm, personal link sharing platform. Share links and thoughts with your inner circle via WhatsApp.",
 };
@@ -31,7 +31,7 @@ export default function LandingPage() {
           <span className="w-7 h-7 rounded-full bg-terracotta flex items-center justify-center">
             <span className="w-3 h-3 rounded-full bg-white" />
           </span>
-          <span className="font-serif text-xl font-semibold text-warm-900">SharingCircle</span>
+          <span className="font-serif text-xl font-semibold text-warm-900">FaveFinds</span>
         </div>
       </nav>
 
@@ -44,7 +44,7 @@ export default function LandingPage() {
           Share your finds<br />with your people.
         </h1>
         <p className="text-xl text-warm-500 leading-relaxed mb-12 max-w-xl mx-auto">
-          SharingCircle is a WhatsApp bot that turns the links your inner circle
+          FaveFinds is a WhatsApp bot that turns the links your inner circle
           shares into a beautiful, organized feed — just for you.
         </p>
         <a
@@ -100,7 +100,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-warm-100 py-8 text-center text-warm-400 text-sm">
-        Made with warmth · © {new Date().getFullYear()} SharingCircle
+        Made with warmth · © {new Date().getFullYear()} FaveFinds
       </footer>
     </div>
   );

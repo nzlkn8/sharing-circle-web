@@ -14,7 +14,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "SharingCircle — Share your finds with your people",
+  title: "FaveFinds — Share your finds with your people",
   description:
     "A warm, personal link sharing platform. Share links and thoughts with your inner circle via WhatsApp.",
 };
