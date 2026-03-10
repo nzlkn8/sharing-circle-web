@@ -155,7 +155,7 @@ export default function SetupPage({ params }) {
           </Link>
           <span className="text-warm-200">·</span>
           <span className="font-serif font-semibold text-warm-900 text-[15px]">
-            {slug}&rsquo;s Circle
+            {slug}&rsquo;s FaveFinds
           </span>
         </div>
       </header>
@@ -163,8 +163,8 @@ export default function SetupPage({ params }) {
       <main className="max-w-2xl mx-auto px-5 py-8 space-y-6">
         {/* Circle header card */}
         <div className="bg-white rounded-2xl p-6 border border-warm-100 shadow-sm">
-          <h2 className="font-serif text-xl font-semibold text-warm-900">Your Circle</h2>
-          <p className="text-sm text-warm-400 mt-0.5">People who share with you</p>
+          <h2 className="font-serif text-xl font-semibold text-warm-900">Your People</h2>
+          <p className="text-sm text-warm-400 mt-0.5">People in your FaveFinds</p>
         </div>
 
         {/* Members list */}
@@ -177,7 +177,7 @@ export default function SetupPage({ params }) {
             <div className="bg-white rounded-2xl p-8 text-center border border-warm-100">
               <p className="text-3xl mb-3">👤</p>
               <p className="text-warm-500 text-sm">
-                No members yet. Add people below to start your circle.
+                No one added yet. Add friends below to start sharing!
               </p>
             </div>
           ) : (
@@ -196,7 +196,7 @@ export default function SetupPage({ params }) {
 
         {/* Add member */}
         <section className="bg-white rounded-2xl p-6 border border-warm-100 shadow-sm">
-          <h3 className="font-serif text-lg font-semibold text-warm-900 mb-5">Add someone</h3>
+          <h3 className="font-serif text-lg font-semibold text-warm-900 mb-5">Add someone to your FaveFinds</h3>
 
           {/* Contact picker */}
           {hasContactPicker === true && (
@@ -248,7 +248,7 @@ export default function SetupPage({ params }) {
               disabled={adding || !form.recipient_name || !form.recipient_phone || !form.recipient_email}
               className="w-full bg-terracotta text-white font-semibold py-3 rounded-xl hover:bg-terracotta-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
             >
-              {adding ? "Adding…" : "Add to circle"}
+              {adding ? "Adding…" : "Add to your FaveFinds"}
             </button>
           </form>
 

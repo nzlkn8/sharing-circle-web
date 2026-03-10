@@ -1,14 +1,14 @@
 export const metadata = {
   title: "FaveFinds — Share your finds with your people",
   description:
-    "A warm, personal link sharing platform. Share links and thoughts with your inner circle via WhatsApp.",
+    "A warm, personal link sharing platform. Share links and thoughts with your people via WhatsApp.",
 };
 
 const features = [
   {
     icon: "🔗",
     title: "Share links",
-    desc: "Forward any URL to the bot and it lands in your circle's feed, summarized and ready to read.",
+    desc: "Forward any URL to the bot and it lands in your people's feed, summarized and ready to read.",
   },
   {
     icon: "✍️",
@@ -18,7 +18,7 @@ const features = [
   {
     icon: "📬",
     title: "Get daily digests",
-    desc: "Every day your circle receives a tidy digest of everything shared — nothing gets buried.",
+    desc: "Every day your people receive a tidy digest of everything shared — nothing gets buried.",
   },
 ];
 
@@ -44,8 +44,8 @@ export default function LandingPage() {
           Share your finds<br />with your people.
         </h1>
         <p className="text-xl text-warm-500 leading-relaxed mb-12 max-w-xl mx-auto">
-          FaveFinds is a WhatsApp bot that turns the links your inner circle
-          shares into a beautiful, organized feed — just for you.
+          FaveFinds is a WhatsApp bot that turns the links your people
+          share into a beautiful, organized feed — just for you.
         </p>
         <a
           href="https://wa.me/16472039443"
@@ -81,7 +81,7 @@ export default function LandingPage() {
       <section className="max-w-xl mx-auto px-6 pb-28 text-center">
         <div className="inline-block bg-white rounded-3xl px-10 py-10 shadow-sm border border-warm-100">
           <p className="font-serif text-2xl font-semibold text-warm-900 mb-3">
-            Ready to start your circle?
+            Ready to start sharing?
           </p>
           <p className="text-warm-500 text-[15px] mb-7">
             Message our bot on WhatsApp and invite up to 15 people you actually talk to.

@@ -112,8 +112,8 @@ export default function FeedPage({ params }) {
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="text-center">
           <p className="text-5xl mb-5">🔍</p>
-          <p className="font-serif text-xl font-semibold text-warm-700 mb-2">Circle not found</p>
-          <p className="text-warm-400 text-sm">No circle exists at this address.</p>
+          <p className="font-serif text-xl font-semibold text-warm-700 mb-2">Page not found</p>
+          <p className="text-warm-400 text-sm">No FaveFinds page exists at this address.</p>
         </div>
       </div>
     );
@@ -131,14 +131,14 @@ export default function FeedPage({ params }) {
               <span className="w-2 h-2 rounded-full bg-white" />
             </span>
             <span className="font-serif font-semibold text-warm-900 text-[15px]">
-              {ownerName || slug}&rsquo;s circle
+              {ownerName || slug}&rsquo;s FaveFinds
             </span>
           </div>
           <Link
             href={`/setup/${slug}`}
             className="text-sm text-warm-400 hover:text-terracotta transition-colors"
           >
-            Manage circle →
+            Manage your people →
           </Link>
         </div>
       </header>
@@ -147,8 +147,8 @@ export default function FeedPage({ params }) {
         {/* Tabs */}
         <div className="flex gap-1 mb-8 bg-white border border-warm-100 rounded-full p-1 w-fit">
           {[
-            { id: "circle", label: "Circle Feed" },
-            { id: "mine", label: "My Posts" },
+            { id: "circle", label: "Their Finds" },
+            { id: "mine", label: "My Finds" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -318,11 +318,11 @@ function EmptyState({ tab }) {
     <div className="text-center py-24">
       <p className="text-5xl mb-5">📭</p>
       <p className="font-serif text-xl font-semibold text-warm-700 mb-2">
-        {tab === "circle" ? "No circle posts yet" : "No posts yet"}
+        {tab === "circle" ? "No finds yet" : "No finds yet"}
       </p>
       <p className="text-warm-400 text-sm">
         {tab === "circle"
-          ? "Posts from people who have you in their circle will appear here."
+          ? "Finds from people in your FaveFinds will appear here."
           : "Your shared links will appear here."}
       </p>
     </div>

@@ -16,7 +16,7 @@ const inter = Inter({
 export const metadata = {
   title: "FaveFinds — Share your finds with your people",
   description:
-    "A warm, personal link sharing platform. Share links and thoughts with your inner circle via WhatsApp.",
+    "A warm, personal link sharing platform. Share links and thoughts with your people via WhatsApp.",
 };
 
 export default function RootLayout({ children }) {
