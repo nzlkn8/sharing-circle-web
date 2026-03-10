@@ -183,13 +183,14 @@ export default function FeedPage({ params }) {
 
 function PostCard({ post }) {
   const isLink = post.type === "link" || post.content?.startsWith("http");
+  const isSpotify = post.source_type === "spotify" || post.content?.includes("spotify.com");
   const [meta, setMeta] = useState({
     title: post.title || null,
     image: post.thumbnail || null,
   });
 
   useEffect(() => {
-    if (!isLink || meta.title) return;
+    if (!isLink || isSpotify || meta.title) return;
     fetch(`https://api.microlink.io?url=${encodeURIComponent(post.content)}`)
       .then((r) => r.json())
       .then((data) => {
@@ -223,11 +224,15 @@ function PostCard({ post }) {
             <h2 className="font-semibold text-warm-900 group-hover:text-terracotta transition-colors leading-snug text-[15px]">
               {meta.title || post.content}
             </h2>
-            <p className="text-xs text-warm-400 truncate mt-1">{post.content}</p>
+            {isSpotify && post.summary ? (
+              <p className="text-sm text-warm-600 mt-1">{post.summary}</p>
+            ) : (
+              <p className="text-xs text-warm-400 truncate mt-1">{post.content}</p>
+            )}
           </div>
         </a>
 
-        {post.summary && (
+        {post.summary && !isSpotify && (
           <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
             <SummaryLines text={post.summary} />
           </div>
