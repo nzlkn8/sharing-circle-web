@@ -9,7 +9,7 @@ export default function SetupPage({ params }) {
   const [ownerPhone, setOwnerPhone] = useState(null);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ recipient_name: "", recipient_phone: "", recipient_email: "" });
+  const [form, setForm] = useState({ recipient_name: "", recipient_phone: "" });
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState(null);
   const [hasContactPicker, setHasContactPicker] = useState(null);
@@ -74,7 +74,6 @@ export default function SetupPage({ params }) {
         setForm({
           recipient_name: c.name?.[0] ?? "",
           recipient_phone: c.tel?.[0] ?? "",
-          recipient_email: c.email?.[0] ?? "",
         });
       }
     } catch {
@@ -88,7 +87,7 @@ export default function SetupPage({ params }) {
 
   async function handleAdd(e) {
     e.preventDefault();
-    if (!form.recipient_name || !form.recipient_phone || !form.recipient_email || !ownerPhone) return;
+    if (!form.recipient_name || !form.recipient_phone || !ownerPhone) return;
 
     setAdding(true);
     const { data, error } = await supabase
@@ -97,7 +96,6 @@ export default function SetupPage({ params }) {
         sender_phone: ownerPhone,
         recipient_name: form.recipient_name,
         recipient_phone: normalizePhone(form.recipient_phone),
-        recipient_email: form.recipient_email,
       })
       .select()
       .single();
@@ -106,7 +104,7 @@ export default function SetupPage({ params }) {
 
     if (!error && data) {
       setMembers((prev) => [...prev, data]);
-      setForm({ recipient_name: "", recipient_phone: "", recipient_email: "" });
+      setForm({ recipient_name: "", recipient_phone: "" });
     }
     setAdding(false);
   }
@@ -169,7 +167,15 @@ export default function SetupPage({ params }) {
 
         {/* Members list */}
         <section>
-          <h3 className="font-serif text-base font-semibold text-warm-900 mb-3 px-1">Members</h3>
+          <div className="flex items-baseline gap-2 mb-3 px-1">
+          <h3 className="font-serif text-base font-semibold text-warm-900">Members</h3>
+          {!loading && (
+            <span className={`text-xs font-medium ${members.length >= 40 && members.length < 50 ? "text-orange-500" : "text-warm-400"}`}>
+              {members.length}/50
+              {members.length >= 40 && members.length < 50 && ` · ${50 - members.length} spot${50 - members.length === 1 ? "" : "s"} remaining`}
+            </span>
+          )}
+        </div>
 
           {loading ? (
             <SkeletonMembers />
@@ -198,62 +204,62 @@ export default function SetupPage({ params }) {
         <section className="bg-white rounded-2xl p-6 border border-warm-100 shadow-sm">
           <h3 className="font-serif text-lg font-semibold text-warm-900 mb-5">Add someone to your FaveFinds</h3>
 
-          {/* Contact picker */}
-          {hasContactPicker === true && (
+          {members.length >= 50 ? (
+            <p className="text-sm text-warm-600 text-center py-2">
+              You&rsquo;ve reached the 50 person limit. Remove someone to add a new person.
+            </p>
+          ) : (
             <>
-              <button
-                onClick={handleContactPicker}
-                type="button"
-                className="w-full flex items-center justify-center gap-2 bg-sage/10 text-sage border border-sage/20 rounded-xl py-3 text-sm font-semibold mb-4 hover:bg-sage/20 transition-colors"
-              >
-                <span>📱</span> Pick from contacts
-              </button>
-              <Divider label="or fill in manually" />
+              {/* Contact picker */}
+              {hasContactPicker === true && (
+                <>
+                  <button
+                    onClick={handleContactPicker}
+                    type="button"
+                    className="w-full flex items-center justify-center gap-2 bg-sage/10 text-sage border border-sage/20 rounded-xl py-3 text-sm font-semibold mb-4 hover:bg-sage/20 transition-colors"
+                  >
+                    <span>📱</span> Pick from contacts
+                  </button>
+                  <Divider label="or fill in manually" />
+                </>
+              )}
+              {hasContactPicker === false && (
+                <p className="text-xs text-warm-400 mb-4">
+                  Contact import isn&rsquo;t available in this browser. On iOS Safari 14+ or Android Chrome you can pick contacts directly.
+                </p>
+              )}
+
+              <form onSubmit={handleAdd} className="space-y-3.5">
+                <Field
+                  label="Name"
+                  required
+                  value={form.recipient_name}
+                  onChange={(v) => setForm((f) => ({ ...f, recipient_name: v }))}
+                  placeholder="Alex"
+                  type="text"
+                />
+                <Field
+                  label="Phone"
+                  required
+                  value={form.recipient_phone}
+                  onChange={(v) => setForm((f) => ({ ...f, recipient_phone: v }))}
+                  placeholder="+1 555 000 0000"
+                  type="tel"
+                  hint="Open WhatsApp, go to their contact, tap their name and copy their number"
+                />
+                <button
+                  type="submit"
+                  disabled={adding || !form.recipient_name || !form.recipient_phone}
+                  className="w-full bg-terracotta text-white font-semibold py-3 rounded-xl hover:bg-terracotta-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+                >
+                  {adding ? "Adding…" : "Add to your FaveFinds"}
+                </button>
+              </form>
             </>
           )}
-          {hasContactPicker === false && (
-            <p className="text-xs text-warm-400 mb-4">
-              Contact import isn&rsquo;t available in this browser. On iOS Safari 14+ or Android Chrome you can pick contacts directly.
-            </p>
-          )}
-
-          <form onSubmit={handleAdd} className="space-y-3.5">
-            <Field
-              label="Name"
-              required
-              value={form.recipient_name}
-              onChange={(v) => setForm((f) => ({ ...f, recipient_name: v }))}
-              placeholder="Alex"
-              type="text"
-            />
-            <Field
-              label="Phone"
-              required
-              value={form.recipient_phone}
-              onChange={(v) => setForm((f) => ({ ...f, recipient_phone: v }))}
-              placeholder="+1 555 000 0000"
-              type="tel"
-              hint="Open WhatsApp, go to their contact, tap their name and copy their number"
-            />
-            <Field
-              label="Email"
-              required
-              value={form.recipient_email}
-              onChange={(v) => setForm((f) => ({ ...f, recipient_email: v }))}
-              placeholder="alex@example.com"
-              type="email"
-            />
-            <button
-              type="submit"
-              disabled={adding || !form.recipient_name || !form.recipient_phone || !form.recipient_email}
-              className="w-full bg-terracotta text-white font-semibold py-3 rounded-xl hover:bg-terracotta-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
-            >
-              {adding ? "Adding…" : "Add to your FaveFinds"}
-            </button>
-          </form>
 
           {/* Add existing contact */}
-          {members.length > 0 && (
+          {members.length > 0 && members.length < 50 && (
             <div className="mt-5 border-t border-warm-100 pt-4">
               <button
                 onClick={() => setShowExisting((v) => !v)}

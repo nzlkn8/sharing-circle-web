@@ -232,6 +232,10 @@ function PostCard({ post }) {
           </div>
         </a>
 
+        {post.caption && (
+          <p className="text-sm text-warm-600 italic mb-3">{post.caption}</p>
+        )}
+
         {post.summary && !isSpotify && (
           <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
             <SummaryLines text={post.summary} />
@@ -252,6 +256,10 @@ function PostCard({ post }) {
   return (
     <article className="bg-white rounded-2xl p-5 border border-warm-100 shadow-sm hover:shadow-md transition-shadow">
       <p className="font-serif text-[17px] text-warm-900 leading-relaxed mb-4">{post.content}</p>
+
+      {post.caption && (
+        <p className="text-sm text-warm-600 italic mb-3">{post.caption}</p>
+      )}
 
       {post.summary && (
         <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
