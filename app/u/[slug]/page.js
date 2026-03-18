@@ -236,7 +236,7 @@ function PostCard({ post }) {
           <p className="text-sm text-warm-600 italic mb-3">{post.caption}</p>
         )}
 
-        {post.summary && !isSpotify && !post.summary.startsWith("http") && (
+        {post.summary && !isSpotify && parseSummaryLines(post.summary).length > 0 && (
           <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
             <SummaryLines text={post.summary} />
           </div>
@@ -261,7 +261,7 @@ function PostCard({ post }) {
         <p className="text-sm text-warm-600 italic mb-3">{post.caption}</p>
       )}
 
-      {post.summary && (
+      {post.summary && parseSummaryLines(post.summary).length > 0 && (
         <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
           <SummaryLines text={post.summary} />
         </div>
@@ -278,17 +278,28 @@ function PostCard({ post }) {
   );
 }
 
-function SummaryLines({ text }) {
-  const lines = text
+function parseSummaryLines(text) {
+  return text
     .split("•")
     .map((l) => l.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((l) => !l.startsWith("http"))
+    .filter((l) => !/^Play from/.test(l))
+    .filter((l) => !/^\d+:\d+/.test(l));
+}
+
+function SummaryLines({ text }) {
+  const lines = parseSummaryLines(text);
+  if (lines.length === 0) return null;
+  if (lines.length === 1) {
+    return <p className="text-[13px] text-warm-700 leading-relaxed">{lines[0]}</p>;
+  }
   return (
     <div>
       {lines.map((line, i) => (
-        <div key={i} className="text-[13px] text-warm-700 leading-relaxed" style={{ marginBottom: i < lines.length - 1 ? 8 : 0 }}>
+        <p key={i} className={`text-[13px] text-warm-700 leading-relaxed${i < lines.length - 1 ? " mb-3" : ""}`}>
           • {line}
-        </div>
+        </p>
       ))}
     </div>
   );
