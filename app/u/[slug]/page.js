@@ -272,7 +272,15 @@ function PostCard({ post }) {
 
 function renderSummary(summary) {
   if (!summary) return null;
-  const lines = summary.split(/\n|(?=•)/).map(l => l.trim()).filter(l => l && !l.startsWith('http') && !l.includes('Play from'));
+  const lines = summary.split(/\n|(?=•)/).map(l => l.trim().replace(/^[-–]\s+/, '')).filter(l => {
+    if (!l) return false;
+    if (l.includes('Play from')) return false;
+    const content = l.replace(/^•\s*/, '').trim();
+    if (content.startsWith('http')) return false;
+    if (content.includes('x.com') || content.includes('twitter.com')) return false;
+    if (/^\S+$/.test(content)) return false;
+    return true;
+  });
   if (lines.length === 0) return null;
   return (
     <div style={{marginTop: '8px'}}>
