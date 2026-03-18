@@ -236,7 +236,7 @@ function PostCard({ post }) {
           <p className="text-sm text-warm-600 italic mb-3">{post.caption}</p>
         )}
 
-        {post.summary && !isSpotify && (
+        {post.summary && !isSpotify && !post.summary.startsWith("http") && (
           <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
             <SummaryLines text={post.summary} />
           </div>
@@ -286,9 +286,9 @@ function SummaryLines({ text }) {
   return (
     <div>
       {lines.map((line, i) => (
-        <p key={i} className="text-[13px] text-warm-700 leading-relaxed" style={{ marginBottom: i < lines.length - 1 ? 8 : 0 }}>
-          {line}
-        </p>
+        <div key={i} className="text-[13px] text-warm-700 leading-relaxed" style={{ marginBottom: i < lines.length - 1 ? 8 : 0 }}>
+          • {line}
+        </div>
       ))}
     </div>
   );
