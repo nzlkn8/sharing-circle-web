@@ -225,22 +225,18 @@ function PostCard({ post }) {
               {meta.title || post.content}
             </h2>
             {isSpotify && post.summary ? (
-              <p className="text-sm text-warm-600 mt-1">{post.summary}</p>
+              renderSummary(post.summary) || <p className="text-xs text-warm-400 truncate mt-1">{post.content}</p>
             ) : (
               <p className="text-xs text-warm-400 truncate mt-1">{post.content}</p>
             )}
           </div>
         </a>
 
-        {post.caption && (
+        {post.caption && !post.caption.includes('Play from') && (
           <p className="text-sm text-warm-600 italic mb-3">{post.caption}</p>
         )}
 
-        {post.summary && !isSpotify && parseSummaryLines(post.summary).length > 0 && (
-          <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
-            <SummaryLines text={post.summary} />
-          </div>
-        )}
+        {post.summary && !isSpotify && (() => { const s = renderSummary(post.summary); return s && <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">{s}</div>; })()}
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -257,15 +253,11 @@ function PostCard({ post }) {
     <article className="bg-white rounded-2xl p-5 border border-warm-100 shadow-sm hover:shadow-md transition-shadow">
       <p className="font-serif text-[17px] text-warm-900 leading-relaxed mb-4">{post.content}</p>
 
-      {post.caption && (
+      {post.caption && !post.caption.includes('Play from') && (
         <p className="text-sm text-warm-600 italic mb-3">{post.caption}</p>
       )}
 
-      {post.summary && parseSummaryLines(post.summary).length > 0 && (
-        <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">
-          <SummaryLines text={post.summary} />
-        </div>
-      )}
+      {post.summary && (() => { const s = renderSummary(post.summary); return s && <div className="bg-cream rounded-xl px-4 py-3 border border-warm-100 mb-3">{s}</div>; })()}
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -278,28 +270,14 @@ function PostCard({ post }) {
   );
 }
 
-function parseSummaryLines(text) {
-  return text
-    .split("•")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .filter((l) => !l.startsWith("http"))
-    .filter((l) => !/^Play from/.test(l))
-    .filter((l) => !/^\d+:\d+/.test(l));
-}
-
-function SummaryLines({ text }) {
-  const lines = parseSummaryLines(text);
+function renderSummary(summary) {
+  if (!summary) return null;
+  const lines = summary.split(/\n|(?=•)/).map(l => l.trim()).filter(l => l && !l.startsWith('http') && !l.includes('Play from'));
   if (lines.length === 0) return null;
-  if (lines.length === 1) {
-    return <p className="text-[13px] text-warm-700 leading-relaxed">{lines[0]}</p>;
-  }
   return (
-    <div>
+    <div style={{marginTop: '8px'}}>
       {lines.map((line, i) => (
-        <p key={i} className={`text-[13px] text-warm-700 leading-relaxed${i < lines.length - 1 ? " mb-3" : ""}`}>
-          • {line}
-        </p>
+        <p key={i} style={{marginBottom: '8px'}}>{line.startsWith('•') ? line : '• ' + line}</p>
       ))}
     </div>
   );
