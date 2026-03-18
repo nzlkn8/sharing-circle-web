@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 export default function SetupPage({ params }) {
   const { slug } = use(params);
   const [ownerPhone, setOwnerPhone] = useState(null);
+  const [ownerName, setOwnerName] = useState("");
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ recipient_name: "", recipient_phone: "" });
@@ -29,7 +30,7 @@ export default function SetupPage({ params }) {
 
       const { data: owner, error: ownerError } = await supabase
         .from("users")
-        .select("phone_number, digest_weekly, digest_daily")
+        .select("phone_number, name, digest_weekly, digest_daily")
         .eq("feed_slug", slug)
         .single();
 
@@ -42,6 +43,7 @@ export default function SetupPage({ params }) {
       }
 
       setOwnerPhone(owner.phone_number);
+      setOwnerName(owner.name || "");
       console.log("[setup] ownerPhone set to:", owner.phone_number);
 
       if (owner.digest_weekly !== null && owner.digest_weekly !== undefined) {
@@ -153,7 +155,7 @@ export default function SetupPage({ params }) {
           </Link>
           <span className="text-warm-200">·</span>
           <span className="font-serif font-semibold text-warm-900 text-[15px]">
-            {slug}&rsquo;s FaveFinds
+            {ownerName || slug}&rsquo;s FaveFinds
           </span>
         </div>
       </header>
