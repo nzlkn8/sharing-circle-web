@@ -280,8 +280,8 @@ function PostCard({ post }) {
 
 function SummaryLines({ text }) {
   const lines = text
-    .split("\n")
-    .map((l) => l.trim().replace(/^[•\-]\s*/, ""))
+    .split("•")
+    .map((l) => l.trim())
     .filter(Boolean);
   return (
     <div>

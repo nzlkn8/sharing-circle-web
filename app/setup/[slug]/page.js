@@ -258,39 +258,6 @@ export default function SetupPage({ params }) {
             </>
           )}
 
-          {/* Add existing contact */}
-          {members.length > 0 && members.length < 50 && (
-            <div className="mt-5 border-t border-warm-100 pt-4">
-              <button
-                onClick={() => setShowExisting((v) => !v)}
-                className="w-full flex items-center justify-between text-sm text-warm-500 hover:text-warm-700 transition-colors"
-              >
-                <span>Add existing contact</span>
-                <span className="text-xs">{showExisting ? "▲" : "▼"}</span>
-              </button>
-              {showExisting && (
-                <div className="mt-3 space-y-2">
-                  {members.map((m) => (
-                    <div
-                      key={m.id}
-                      className="flex items-center justify-between gap-3 py-2 px-3 bg-cream rounded-xl border border-warm-100"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-warm-900 truncate">{m.recipient_name}</p>
-                        <p className="text-xs text-warm-400 truncate">{m.recipient_phone}</p>
-                      </div>
-                      <button
-                        onClick={() => handleReAdd(m)}
-                        className="flex-shrink-0 text-xs font-semibold bg-terracotta/10 text-terracotta px-3 py-1.5 rounded-lg hover:bg-terracotta/20 transition-colors"
-                      >
-                        Add
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </section>
 
         {/* Digest Settings */}
