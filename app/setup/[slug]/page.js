@@ -295,7 +295,6 @@ function MemberRow({ member, removing, onRemove }) {
         <p className="text-sm font-semibold text-warm-900 truncate">{member.recipient_name}</p>
         <p className="text-xs text-warm-400 truncate">
           {member.recipient_phone}
-          {member.recipient_email ? ` · ${member.recipient_email}` : ""}
         </p>
       </div>
       <button
