@@ -22,6 +22,7 @@ export default function FeedPage({ params }) {
   const [circlePosts, setCirclePosts] = useState([]);
   const [myPosts, setMyPosts] = useState([]);
   const [activeTab, setActiveTab] = useState("circle");
+  const [activeFilter, setActiveFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -119,7 +120,10 @@ export default function FeedPage({ params }) {
     );
   }
 
-  const displayedPosts = activeTab === "circle" ? circlePosts : myPosts;
+  const tabPosts = activeTab === "circle" ? circlePosts : myPosts;
+  const displayedPosts = activeFilter === "all"
+    ? tabPosts
+    : tabPosts.filter((p) => p.category === activeFilter);
 
   return (
     <div className="min-h-screen bg-cream">
@@ -152,7 +156,7 @@ export default function FeedPage({ params }) {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => { setActiveTab(tab.id); setActiveFilter("all"); }}
               className={`px-5 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 activeTab === tab.id
                   ? "bg-terracotta text-white shadow-sm"
@@ -160,6 +164,29 @@ export default function FeedPage({ params }) {
               }`}
             >
               {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Filter pills */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {[
+            { id: "all", label: "All" },
+            { id: "music", label: "Music" },
+            { id: "podcast", label: "Podcasts" },
+            { id: "article", label: "Articles" },
+            { id: "other", label: "Other" },
+          ].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setActiveFilter(f.id)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                activeFilter === f.id
+                  ? "bg-terracotta text-white border-terracotta"
+                  : "bg-white text-warm-500 border-warm-100 hover:text-terracotta hover:border-terracotta"
+              }`}
+            >
+              {f.label}
             </button>
           ))}
         </div>
